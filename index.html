@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Orbit – VIT Chat</title>
+<style>
+:root{--bg:#f6f4ff;--card:#fff;--tx:#1d1b2e;--mu:#6b6880;--pr:#6c4cf1;--ac:#ff5c8a;--bd:#e4e0f5}
+@media(prefers-color-scheme:dark){:root{--bg:#12111c;--card:#1d1b2e;--tx:#f1effa;--mu:#9a96b3;--bd:#2e2b45}}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--tx);padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+.wrap{max-width:520px;margin:0 auto;padding:16px;height:100%}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:20px}
+h1{margin:0 0 4px;font-size:28px;background:linear-gradient(90deg,var(--pr),var(--ac));-webkit-background-clip:text;background-clip:text;color:transparent}
+p.s{color:var(--mu);margin:0 0 16px;font-size:14px}
+.lbl{font-weight:600;margin:14px 0 6px;font-size:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.opt{flex:1;min-width:90px;padding:12px;border:2px solid var(--bd);border-radius:12px;text-align:center;cursor:pointer;background:transparent;color:var(--tx);font-size:15px}
+.opt.on{border-color:var(--pr);background:rgba(108,76,241,.12);font-weight:600}
+.go{width:100%;margin-top:18px;padding:14px;border:0;border-radius:12px;background:linear-gradient(90deg,var(--pr),var(--ac));color:#fff;font-size:17px;font-weight:700;cursor:pointer}
+.go:disabled{opacity:.4}
+.chk{display:flex;gap:8px;margin-top:14px;font-size:13px;color:var(--mu)}
+#chat{display:none;height:100%;flex-direction:column;gap:8px}
+#vids{display:none;position:relative;height:42%;background:#000;border-radius:14px;overflow:hidden}
+#rv{width:100%;height:100%;object-fit:cover}
+#lv{position:absolute;right:8px;bottom:8px;width:90px;height:120px;object-fit:cover;border-radius:10px;border:2px solid #fff;transform:scaleX(-1)}
+#st{text-align:center;color:var(--mu);font-size:14px;padding:4px}
+#log{flex:1;overflow-y:auto;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:6px}
+.m{max-width:80%;padding:8px 12px;border-radius:14px;font-size:15px;word-wrap:break-word}
+.me{align-self:flex-end;background:var(--pr);color:#fff}.th{align-self:flex-start;background:var(--bd)}
+.bar{display:flex;gap:6px}
+.bar input{flex:1;padding:12px;border-radius:12px;border:1px solid var(--bd);background:var(--card);color:var(--tx);font-size:16px}
+.b{padding:12px 14px;border:0;border-radius:12px;font-weight:700;cursor:pointer;color:#fff}
+.skip{background:var(--pr)}.stop{background:#555}.rep{background:#d33}.snd{background:var(--ac)}
+.in{width:100%;padding:13px;border-radius:12px;border:1px solid var(--bd);background:var(--card);color:var(--tx);font-size:16px;margin-top:8px}
+.err{color:#d33;font-size:13px;min-height:16px;margin-top:6px}
+.sm{padding:8px 10px;font-size:13px;border-radius:10px}.ice{background:#f5a623}.meet{background:#1fae6a}
+.link{background:none;border:0;color:var(--pr);font-weight:600;cursor:pointer;margin-top:10px;font-size:14px}
+#nk{font-weight:700;color:var(--pr)}
+.eml{display:flex;align-items:center;gap:6px}.eml .in{flex:1;min-width:0}.dom{margin-top:8px;font-size:14px;color:var(--mu);white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <div id="login" class="card">
+  <h1>Orbit</h1>
+  <p class="s">Only for VIT students 🎓 Enter your VIT email ID (the part before @vitstudent.ac.in) to get an OTP.</p>
+  <div class="eml"><input class="in" id="em" type="text" placeholder="yourname.batch" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false"><span class="dom">@vitstudent.ac.in</span></div>
+  <input class="in" id="otp" inputmode="numeric" maxlength="6" placeholder="6-digit OTP" style="display:none">
+  <div class="err" id="er"></div>
+  <button class="go" id="lg">Send OTP</button>
+ </div>
+ <div id="setup" class="card" style="display:none">
+  <h1>Orbit</h1>
+  <p class="s">Make new friends, no hesitation. Made for VIT students. <span id="on">0</span> VITians online</p>
+  <div class="lbl">Who are you?</div>
+  <div class="row" data-k="gender"><button class="opt" data-v="boy">👦 Boy</button><button class="opt" data-v="girl">👧 Girl</button></div>
+  <div class="lbl">Who do you want to talk to?</div>
+  <div class="row" data-k="want"><button class="opt" data-v="boy">Boys</button><button class="opt" data-v="girl">Girls</button><button class="opt" data-v="any">Anyone</button></div>
+  <div class="lbl">How?</div>
+  <div class="row" data-k="mode"><button class="opt" data-v="text">💬 Chat</button><button class="opt" data-v="video">🎥 Video</button></div>
+  <div class="lbl">Interests (optional, comma-separated) – people with the same interests get matched first</div>
+  <input class="in" id="ints" placeholder="coding, cricket, anime, music" style="margin-top:0">
+  <label class="chk"><input type="checkbox" id="age"> I am 18+ and a college student. I will be respectful and will not share personal info (phone, address) too early.</label>
+  <button class="go" id="go" disabled>Start 🚀</button>
+ </div>
+
+ <div id="chat">
+  <div id="vids"><video id="rv" autoplay playsinline></video><video id="lv" autoplay playsinline muted></video></div>
+  <div id="st"></div><div id="nkb" style="text-align:center;font-size:13px;color:var(--mu)"></div>
+  <div id="log"></div>
+  <div class="bar"><input id="ti" placeholder="Type a message..." autocomplete="off"><button class="b snd" id="snd">Send</button></div>
+  <div class="bar"><button class="b sm ice" id="ice">🧊 Icebreaker</button><button class="b sm meet" id="meet">🤝 Let's meet</button><button class="b sm skip" id="inv">📲 Invite</button></div>
+  <div class="bar"><button class="b skip" id="skip" style="flex:2">Skip ⏭</button><button class="b stop" id="stop">Stop</button><button class="b rep" id="rep">Report</button></div>
+ </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const $=id=>document.getElementById(id), sel={};
+const ICE=[{urls:'stun:stun.l.google.com:19302'}]; // add TURN here for college WiFi (see README)
+const QS=['Which branch and year are you in? Worried about placements?','Best and worst item in the mess?','One thing you learned after coming to VIT?','What was the last thing you binge-watched?','Hostel or day scholar? How is it going?','If you had one free day, what would you do?','Which club did you join, or want to join?'];
+let s,pc,stream,prefs,token,email;
+try{token=localStorage.getItem('vt');email=localStorage.getItem('ve')}catch(e){}
+
+function connect(){
+  s=io({auth:{token}});
+  s.on('connect_error',()=>{try{localStorage.removeItem('vt')}catch(e){};token=null;$('setup').style.display='none';$('login').style.display='block'});
+  s.on('online',n=>$('on').textContent=n);
+  s.on('searching',()=>status('Searching for a VITian... 🔍'));
+  s.on('matched',async({initiator,nick,common})=>{
+    $('nkb').innerHTML='You are chatting with <b id="nk">'+nick+'</b>'+(common.length?' · Common: '+common.join(', ')+' 🎯':'');
+    status('Connected! Say hi 👋');add('Anonymous chat started. Don\'t share personal info too early.','th');
+    if(prefs.mode==='video'){
+      pc=new RTCPeerConnection({iceServers:ICE});
+      stream.getTracks().forEach(t=>pc.addTrack(t,stream));
+      pc.ontrack=e=>$('rv').srcObject=e.streams[0];
+      pc.onicecandidate=e=>e.candidate&&s.emit('signal',{c:e.candidate});
+      if(initiator){const o=await pc.createOffer();await pc.setLocalDescription(o);s.emit('signal',{d:pc.localDescription})}
+    }
+  });
+  s.on('signal',async({d,c})=>{
+    if(!pc)return;
+    if(d){await pc.setRemoteDescription(d);if(d.type==='offer'){const a=await pc.createAnswer();await pc.setLocalDescription(a);s.emit('signal',{d:pc.localDescription})}}
+    if(c)try{await pc.addIceCandidate(c)}catch(e){}
+  });
+  s.on('msg',t=>{add(t,'th');status('')});
+  let tt;s.on('typing',()=>{status('Typing...');clearTimeout(tt);tt=setTimeout(()=>status(''),1500)});
+  s.on('partner-left',()=>{closePC();status('Stranger left. Finding someone new...');setTimeout(search,1200)});
+  s.on('reveal-asked',()=>add('The other person tapped "Let\'s meet". If you tap it too, you will both see each other\'s VIT email.','th'));
+  s.on('revealed',e=>add('🎉 You both said yes! Their VIT email: '+e,'th'));
+  s.on('banned',({perm}={})=>{document.body.innerHTML='<div class="wrap"><div class="card"><h1>Blocked</h1><p class="s">'+(perm?'Your account is permanently blocked due to too many reports.':'You received 5 reports within an hour, so you are blocked for 24 hours. Please come back tomorrow.')+'</p></div></div>'});
+}
+
+function add(t,c){const d=document.createElement('div');d.className='m '+c;d.textContent=t;$('log').appendChild(d);$('log').scrollTop=1e9}
+function status(t){$('st').textContent=t}
+function closePC(){if(pc){pc.close();pc=null}$('rv').srcObject=null}
+function show(){$('login').style.display='none';$('setup').style.display='block';connect()}
+
+// ----- login -----
+let step=0;
+$('lg').onclick=async()=>{
+  const btn=$('lg'),lab=btn.textContent;$('er').textContent='';
+  const em=$('em').value.trim().toLowerCase().split('@')[0].replace(/\s+/g,'')+'@vitstudent.ac.in';
+  if(em==='@vitstudent.ac.in')return $('er').textContent='Please enter your email ID first.';
+  btn.disabled=true;btn.textContent=step?'Verifying...':'Sending OTP...';
+  try{
+    const ctl=new AbortController();const to=setTimeout(()=>ctl.abort(),45000);
+    const r=await fetch(step?'/api/verify':'/api/otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em,code:$('otp').value.trim()}),signal:ctl.signal});
+    clearTimeout(to);
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok){$('er').textContent=j.e||'Something went wrong ('+r.status+').';btn.textContent=lab;btn.disabled=false;return}
+    if(!step){step=1;$('otp').style.display='block';btn.textContent='Verify';$('er').textContent='OTP sent. Check your inbox and spam folder.'}
+    else{token=j.token;try{localStorage.setItem('vt',token);localStorage.setItem('ve',em)}catch(e){};show();return}
+  }catch(e){
+    $('er').textContent='Could not reach the server. If the site was idle, wait 1 minute and try again. Make sure you opened the website link, not the file.';
+    btn.textContent=lab;
+  }
+  btn.disabled=false;
+};
+if(token)show();
+
+// ----- setup -----
+document.querySelectorAll('.row').forEach(r=>r.onclick=e=>{
+  const b=e.target.closest('.opt'); if(!b)return;
+  r.querySelectorAll('.opt').forEach(o=>o.classList.remove('on')); b.classList.add('on');
+  sel[r.dataset.k]=b.dataset.v; chk();
+});
+const chk=()=>$('go').disabled=!(sel.gender&&sel.want&&sel.mode&&$('age').checked);
+$('age').onchange=chk;
+
+$('go').onclick=async()=>{
+  prefs={...sel,interests:$('ints').value.split(',').map(x=>x.trim()).filter(Boolean)};
+  if(prefs.mode==='video'){
+    try{stream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});$('lv').srcObject=stream;$('vids').style.display='block'}
+    catch(e){alert('Camera/mic permission is needed for video. Try Chat mode.');return}
+  }
+  $('setup').style.display='none';$('chat').style.display='flex';search();
+};
+function search(){closePC();$('log').innerHTML='';$('nkb').textContent='';status('Searching for a VITian... 🔍');s.emit('find',prefs)}
+
+// ----- chat -----
+const send=()=>{const t=$('ti').value.trim();if(!t)return;s.emit('msg',t);add(t,'me');$('ti').value=''};
+$('snd').onclick=send;$('ti').onkeydown=e=>{e.key==='Enter'?send():s.emit('typing')};
+$('skip').onclick=()=>search();
+$('ice').onclick=()=>{const q=QS[Math.floor(Math.random()*QS.length)];s.emit('msg',q);add(q,'me')};
+$('meet').onclick=()=>{s.emit('reveal');add('You tapped "Let\'s meet". You will see each other\'s email only if they tap it too.','th')};
+$('inv').onclick=()=>{const t='Anonymous chat/video for VIT students: '+location.origin;navigator.share?navigator.share({text:t}).catch(()=>{}):window.open('https://wa.me/?text='+encodeURIComponent(t))};
+$('rep').onclick=()=>{if(confirm('Report this person and move on?')){s.emit('report');search()}};
+$('stop').onclick=()=>{s.emit('leave');closePC();if(stream)stream.getTracks().forEach(t=>t.stop());location.reload()};
+</script>
+</body>
+</html>
