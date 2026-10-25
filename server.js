@@ -34,9 +34,10 @@ app.post('/api/otp', async (req, res) => {
   const code = String(crypto.randomInt(100000, 999999));
   otps.set(email, { code, exp: Date.now() + 10 * 60000, tries: 0, sent: Date.now() });
   try {
-    if (mailer) await mailer.sendMail({ from: process.env.SMTP_FROM || process.env.SMTP_USER, to: email,
+    if (process.env.BREVO_API_KEY) { const r = await fetch('https://api.brevo.com/v3/smtp/email', { method: 'POST', headers: { 'api-key': process.env.BREVO_API_KEY, 'content-type': 'application/json' }, body: JSON.stringify({ sender: { name: 'Orbit', email: process.env.SMTP_FROM }, to: [{ email }], subject: 'Your Orbit verification code: ' + code, textContent: `Your verification code is ${code}. Valid for 10 minutes.` }) }); if (!r.ok) throw new Error('Brevo ' + r.status + ' ' + await r.text()); }
+    else if (mailer) await mailer.sendMail({ from: process.env.SMTP_FROM || process.env.SMTP_USER, to: email,
       subject: 'Your Orbit verification code: ' + code, text: `Your verification code is ${code}. Valid for 10 minutes.` });
-    else if (process.env.RENDER) { console.error('SMTP not configured: set SMTP_HOST, SMTP_USER, SMTP_PASS, SMTP_FROM'); return res.status(500).json({ e: 'Email service is not set up yet. Please contact the admin.' }); }
+    else if (process.env.RENDER) { console.error('Email not configured: set BREVO_API_KEY and SMTP_FROM'); return res.status(500).json({ e: 'Email service is not set up yet. Please contact the admin.' }); }
     else console.log('DEV OTP for', email, code);
     res.json({ ok: true });
   } catch (e) { console.error('MAIL ERROR:', e.message); res.status(500).json({ e: 'Could not send the email. Please try again later.' }); }
