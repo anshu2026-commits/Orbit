@@ -38,7 +38,7 @@ p.s{color:var(--mu);margin:0 0 16px;font-size:14px}
 .link{background:none;border:0;color:var(--pr);font-weight:600;cursor:pointer;margin-top:10px;font-size:14px}
 #nk{font-weight:700;color:var(--pr)}
 .eml{display:flex;align-items:center;gap:6px}.eml .in{flex:1;min-width:0}.dom{margin-top:8px;font-size:14px;color:var(--mu);white-space:nowrap}
-</style>
+</style><script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 <div class="wrap">
@@ -49,7 +49,8 @@ p.s{color:var(--mu);margin:0 0 16px;font-size:14px}
   <input class="in" id="otp" inputmode="numeric" maxlength="6" placeholder="6-digit OTP" style="display:none">
   <div class="err" id="er"></div>
   <button class="go" id="lg">Send OTP</button>
- </div>
+ <div style="text-align:center;margin:14px 0 6px;color:var(--mu);font-size:13px">or</div>
+<div id="gbtn" style="display:flex;justify-content:center"></div></div>
  <div id="setup" class="card" style="display:none">
   <h1>Orbit</h1>
   <p class="s">Make new friends, no hesitation. Made for VIT students. <span id="on">0</span> VITians online</p>
@@ -139,7 +140,22 @@ $('lg').onclick=async()=>{
   btn.disabled=false;
 };
 if(token)show();
-
+window.onGoogle=async(resp)=>{
+  $('er').textContent='';
+  try{
+    const r=await fetch('/api/google',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({credential:resp.credential})});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok){$('er').textContent=j.e||'Google login failed';return}
+    token=j.token;email=j.email;
+    try{localStorage.setItem('vt',token);localStorage.setItem('ve',j.email||'')}catch(e){}
+    show();
+  }catch(e){$('er').textContent='Could not reach the server.'}
+};
+(function initG(){
+  if(!window.google||!google.accounts)return setTimeout(initG,200);
+  google.accounts.id.initialize({client_id:'1027979835814-9gqasn3d7n6mkr31bj4nur3sv055f943.apps.googleusercontent.com',callback:onGoogle,hd:'vitstudent.ac.in'});
+  google.accounts.id.renderButton($('gbtn'),{theme:'outline',size:'large',text:'signin_with',width:280});
+})();
 // ----- setup -----
 document.querySelectorAll('.row').forEach(r=>r.onclick=e=>{
   const b=e.target.closest('.opt'); if(!b)return;
