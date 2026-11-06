@@ -9,7 +9,24 @@ const server = http.createServer(app);
 const io = new Server(server);
 app.use(express.json());
 app.get('/', (req, res) => res.sendFile(__dirname + '/index.html'));
-
+app.get('/privacy', (req, res) => {
+  res.send(`<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orbit - Privacy Policy</title>
+<style>body{font-family:sans-serif;max-width:700px;margin:40px auto;padding:0 16px;line-height:1.6}</style>
+</head><body>
+<h1>Orbit Privacy Policy</h1>
+<p>Last updated: November 2026</p>
+<h2>What we collect</h2>
+<p>When you sign in with Google, we receive your name, email address and profile picture. We also store the messages you send on Orbit.</p>
+<h2>How we use it</h2>
+<p>We use this information only to verify that you have a VIT email, create your account and run the chat service. We do not sell or share your data with third parties.</p>
+<h2>Storage and deletion</h2>
+<p>To delete your account and data, email us at the address below.</p>
+<h2>Contact</h2>
+<p>vit.orbit.app@gmail.com</p>
+</body></html>`);
+});
 const DOMAIN = '@vitstudent.ac.in';
 const HOURLY_LIMIT = +(process.env.HOURLY_LIMIT || 5); // reports in 1 hour -> 24h block
 const REPORT_LIMIT = +(process.env.REPORT_LIMIT || 30); // reports before permanent block
