@@ -12,19 +12,19 @@ app.get('/', (req, res) => res.sendFile(__dirname + '/index.html'));
 app.get('/privacy', (req, res) => {
   res.send(`<!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Orbit - Privacy Policy</title>
+<title>Vitnest - Privacy Policy</title>
 <style>body{font-family:sans-serif;max-width:700px;margin:40px auto;padding:0 16px;line-height:1.6}</style>
 </head><body>
-<h1>Orbit Privacy Policy</h1>
+<h1>Vitnest Privacy Policy</h1>
 <p>Last updated: November 2026</p>
 <h2>What we collect</h2>
-<p>When you sign in with Google, we receive your name, email address and profile picture. We also store the messages you send on Orbit.</p>
+<p>When you sign in with Google, we receive your name, email address and profile picture. We also store the messages you send on Vitnest.</p>
 <h2>How we use it</h2>
 <p>We use this information only to verify that you have a VIT email, create your account and run the chat service. We do not sell or share your data with third parties.</p>
 <h2>Storage and deletion</h2>
 <p>To delete your account and data, email us at the address below.</p>
 <h2>Contact</h2>
-<p>vit.orbit.app@gmail.com</p>
+<p>vit.Vitnest.app@gmail.com</p>
 </body></html>`);
 });
 const DOMAIN = '@vitstudent.ac.in';
@@ -51,9 +51,9 @@ app.post('/api/otp', async (req, res) => {
   const code = String(crypto.randomInt(100000, 999999));
   otps.set(email, { code, exp: Date.now() + 10 * 60000, tries: 0, sent: Date.now() });
   try {
-    if (process.env.BREVO_API_KEY) { const r = await fetch('https://api.brevo.com/v3/smtp/email', { method: 'POST', headers: { 'api-key': process.env.BREVO_API_KEY, 'content-type': 'application/json' }, body: JSON.stringify({ sender: { name: 'Orbit', email: process.env.SMTP_FROM }, to: [{ email }], subject: 'Your Orbit verification code: ' + code, textContent: `Your verification code is ${code}. Valid for 10 minutes.` }) }); if (!r.ok) throw new Error('Brevo ' + r.status + ' ' + await r.text()); }
+    if (process.env.BREVO_API_KEY) { const r = await fetch('https://api.brevo.com/v3/smtp/email', { method: 'POST', headers: { 'api-key': process.env.BREVO_API_KEY, 'content-type': 'application/json' }, body: JSON.stringify({ sender: { name: 'Vitnest', email: process.env.SMTP_FROM }, to: [{ email }], subject: 'Your Vitnest verification code: ' + code, textContent: `Your verification code is ${code}. Valid for 10 minutes.` }) }); if (!r.ok) throw new Error('Brevo ' + r.status + ' ' + await r.text()); }
     else if (mailer) await mailer.sendMail({ from: process.env.SMTP_FROM || process.env.SMTP_USER, to: email,
-      subject: 'Your Orbit verification code: ' + code, text: `Your verification code is ${code}. Valid for 10 minutes.` });
+      subject: 'Your Vitnest verification code: ' + code, text: `Your verification code is ${code}. Valid for 10 minutes.` });
     else if (process.env.RENDER) { console.error('Email not configured: set BREVO_API_KEY and SMTP_FROM'); return res.status(500).json({ e: 'Email service is not set up yet. Please contact the admin.' }); }
     else console.log('DEV OTP for', email, code);
     res.json({ ok: true });
