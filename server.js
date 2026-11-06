@@ -9,6 +9,12 @@ const server = http.createServer(app);
 const io = new Server(server);
 app.use(express.json());
 app.get('/', (req, res) => res.sendFile(__dirname + '/index.html'));
+app.get('/sitemap.xml', (req, res) => {
+  res.type('application/xml').send('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://vitnest.onrender.com/</loc></url></urlset>');
+});
+app.get('/robots.txt', (req, res) => {
+  res.type('text/plain').send('User-agent: *\nAllow: /\nSitemap: https://vitnest.onrender.com/sitemap.xml');
+});
 app.get('/privacy', (req, res) => {
   res.send(`<!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
