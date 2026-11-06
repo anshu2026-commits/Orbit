@@ -50,7 +50,7 @@ p.s{color:var(--mu);margin:0 0 16px;font-size:14px}
 </div>
  <div id="setup" class="card" style="display:none">
   <h1>Orbit</h1>
-  <p class="s">Make new friends, no hesitation. Made for VIT students. <span id="on">0</span> VITians online</p>
+  <p class="s">Make new friends, no hesitation. Made for VIT students. <span id="on">0</span> VITians online · 👦 <span id="bn">0</span> boys · 👧 <span id="gn">0</span> girls</p>
   <div class="lbl">Who are you?</div>
   <div class="row" data-k="gender"><button class="opt" data-v="boy">👦 Boy</button><button class="opt" data-v="girl">👧 Girl</button></div>
   <div class="lbl">Who do you want to talk to?</div>
@@ -84,7 +84,7 @@ try{token=localStorage.getItem('vt');email=localStorage.getItem('ve')}catch(e){}
 function connect(){
   s=io({auth:{token}});
   s.on('connect_error',()=>{try{localStorage.removeItem('vt')}catch(e){};token=null;$('setup').style.display='none';$('login').style.display='block'});
-  s.on('online',n=>$('on').textContent=n);
+  s.on('online',d=>{$('on').textContent=d.total;$('bn').textContent=d.boys;$('gn').textContent=d.girls});
   s.on('searching',()=>status('Searching for a VITian... 🔍'));
   s.on('matched',async({initiator,nick,common})=>{
     $('nkb').innerHTML='You are chatting with <b id="nk">'+nick+'</b>'+(common.length?' · Common: '+common.join(', ')+' 🎯':'');
