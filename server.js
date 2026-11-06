@@ -133,7 +133,11 @@ function find(sock, prefs) {
   io.to(o.id).emit('matched', { initiator: true, nick: n1, common });
   sock.emit('matched', { initiator: false, nick: n2, common });
 }
-
+function sendOnline() {
+  let boys = 0, girls = 0;
+  users.forEach(u => { if (u.gender === 'boy') boys++; else if (u.gender === 'girl') girls++; });
+  io.emit('online', { total: users.size, boys, girls });
+}
 io.use((s, next) => {
   const t = tokens.get(s.handshake.auth && s.handshake.auth.token);
   if (!t) return next(new Error('auth'));
@@ -143,12 +147,14 @@ io.use((s, next) => {
 
 io.on('connection', sock => {
   users.set(sock.id, { ...sock.user, reveal: false });
-  io.emit('online', io.engine.clientsCount);
+  sendOnline();
   const peer = () => partner.get(sock.id);
 
   sock.on('find', p => {
     if (!['boy', 'girl'].includes(p.gender) || !['boy', 'girl', 'any'].includes(p.want) || !['text', 'video'].includes(p.mode)) return;
     const interests = (Array.isArray(p.interests) ? p.interests : []).slice(0, 5).map(x => String(x).slice(0, 20).toLowerCase());
+    const u0 = users.get(sock.id);
+    if (u0 && u0.gender !== p.gender) { u0.gender = p.gender; sendOnline(); }
     find(sock, { gender: p.gender, want: p.want, mode: p.mode, interests });
   });
   sock.on('signal', d => { const p = peer(); if (p) io.to(p).emit('signal', d); });
@@ -182,7 +188,7 @@ io.on('connection', sock => {
     }
     unpair(sock.id);
   });
-  sock.on('disconnect', () => { unpair(sock.id); users.delete(sock.id); io.emit('online', io.engine.clientsCount); });
+  sock.on('disconnect', () => { unpair(sock.id); users.delete(sock.id); sendOnline(); });
 });
 
 server.listen(process.env.PORT || 3000, () => console.log('Running'));
