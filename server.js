@@ -70,7 +70,40 @@ app.post('/api/verify', (req, res) => {
   tokens.set(token, { email, h: sha(email) });
   res.json({ token });
 });
+app.post('/api/google', async (req, res) => {
+  try {
+    if (!process.env.GOOGLE_CLIENT_ID) {
+      console.error('GOOGLE_CLIENT_ID is not set');
+      return res.status(500).json({ e: 'Google login is not set up yet.' });
+    }
+    const credential = String(req.body.credential || '');
+    if (!credential) return res.status(400).json({ e: 'Missing Google credential.' });
 
+    const r = await fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(credential));
+    const g = await r.json().catch(() => ({}));
+    if (!r.ok || g.aud !== process.env.GOOGLE_CLIENT_ID) {
+      return res.status(401).json({ e: 'Invalid Google login. Please try again.' });
+    }
+    if (g.email_verified !== 'true' && g.email_verified !== true) {
+      return res.status(401).json({ e: 'Your Google email is not verified.' });
+    }
+
+    const email = String(g.email || '').trim().toLowerCase();
+    if (!/^[a-z0-9._-]+@vitstudent\.ac\.in$/.test(email)) {
+      return res.status(400).json({ e: 'Only VIT student emails (@vitstudent.ac.in) are allowed.' });
+    }
+    if (blocked(sha(email))) {
+      return res.status(403).json({ e: 'Your account is currently blocked due to reports.' });
+    }
+
+    const token = crypto.randomBytes(24).toString('hex');
+    tokens.set(token, { email, h: sha(email) });
+    res.json({ token, email });
+  } catch (e) {
+    console.error('GOOGLE LOGIN ERROR:', e.message);
+    res.status(500).json({ e: 'Google login failed. Please try again.' });
+  }
+});
 // ---------- matching ----------
 const A = ['Silent', 'Chill', 'Sleepy', 'Happy', 'Brave', 'Funky', 'Sassy', 'Cool'];
 const B = ['Panda', 'Tiger', 'Maggi', 'Samosa', 'Owl', 'Coder', 'Topper', 'Backbencher'];
