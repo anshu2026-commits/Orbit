@@ -44,13 +44,10 @@ p.s{color:var(--mu);margin:0 0 16px;font-size:14px}
 <div class="wrap">
  <div id="login" class="card">
   <h1>Orbit</h1>
-  <p class="s">Only for VIT students 🎓 Enter your VIT email ID (the part before @vitstudent.ac.in) to get an OTP.</p>
-  <div class="eml"><input class="in" id="em" type="text" placeholder="yourname.batch" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false"><span class="dom">@vitstudent.ac.in</span></div>
-  <input class="in" id="otp" inputmode="numeric" maxlength="6" placeholder="6-digit OTP" style="display:none">
+  <p class="s">Only for VIT students 🎓 Sign in with your VIT Google account (@vitstudent.ac.in) to continue.</p>
   <div class="err" id="er"></div>
-  <button class="go" id="lg">Send OTP</button>
- <div style="text-align:center;margin:14px 0 6px;color:var(--mu);font-size:13px">or</div>
-<div id="gbtn" style="display:flex;justify-content:center"></div></div>
+  <div id="gbtn" style="display:flex;justify-content:center;margin-top:12px"></div>
+</div>
  <div id="setup" class="card" style="display:none">
   <h1>Orbit</h1>
   <p class="s">Make new friends, no hesitation. Made for VIT students. <span id="on">0</span> VITians online</p>
@@ -120,7 +117,7 @@ function show(){$('login').style.display='none';$('setup').style.display='block'
 
 // ----- login -----
 let step=0;
-$('lg').onclick=async()=>{
+if($('lg'))$('lg').onclick=async()=>{
   const btn=$('lg'),lab=btn.textContent;$('er').textContent='';
   const em=$('em').value.trim().toLowerCase().split('@')[0].replace(/\s+/g,'')+'@vitstudent.ac.in';
   if(em==='@vitstudent.ac.in')return $('er').textContent='Please enter your email ID first.';
